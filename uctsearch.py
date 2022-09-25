@@ -26,9 +26,10 @@ graph = {
 class Node:
     def __init__(self, dirty, start, path, cost):
         self.cost = cost
-        self.path = path
+        self.__path = path
         self.pos = start
         self.dirty = dirty
+        # print('NODE PATH: '+str(self.path))
 
     def isclean(self):
         if len(self.dirty)==0:
@@ -40,6 +41,20 @@ class Node:
             self.cost += .6
             self.dirty.remove(self.pos)
         return self
+
+    def addToPath(self, data):
+        self.__path.append(data)
+
+    def incCost(self, num):
+        self.cost+=num
+
+    def getPath(self):
+        return self.__path
+
+
+def createNode(dirty, start, path, cost):
+    node = Node(dirty, start, path, cost)
+    return node
 
 
 class PriorityQueue(object):
@@ -80,39 +95,58 @@ class PriorityQueue(object):
             exit()
 
 def uct(dirty, start):
+
     queue = PriorityQueue()
-    node = Node(dirty, start, [start], 0)
+    node = createNode(dirty, start, [], 0)
     queue.insert(node)
 
     visited = {start: [start]}
 
     while not queue.isEmpty():
+
         temp = queue.delete()
-        temp.suck()
+        temp.addToPath(temp.pos)
+        # print('temppath: '+str(temp.path))
+
+        path = temp.getPath()
+        cost = temp.cost
+
+        print(str(path))
+        print('dirty: '+str(dirty))
+
         if temp.isclean():
+
             print('success')
-            print(str(temp.path))
+            print(str(temp.getPath()))
             print(str(temp.cost))
-            exit()
+            return
 
         else:
 
-            print('cost: '+str(temp.cost))
-            print('position: '+str(temp.pos))
+            # print('cost: '+str(temp.cost))
+            # print('position: '+str(temp.pos))
 
             for i in graph[temp.pos]:
-                temp2 = Node(temp.dirty, i, temp.path, temp.cost)
-                temp2.path.append(i)
-                print('cost '+str(graph[temp.pos][i]))
-                print('temp2 cost: '+str(temp2.cost))
-                temp2.cost += graph[temp.pos][i]
-                print('temp2 cost: '+str(temp2.cost))
+                # print(str(i))
+                temp2 = createNode(temp.dirty, i, path, cost)
                 
-                print('dirty: '+str(temp2.dirty))
+                temp2.suck()
+
+                # print('cost '+str(graph[temp.pos][i]))
+                # print('temp2 cost: '+str(temp2.cost))
+
+                temp2.incCost(graph[temp.pos][i])
+                
+                # print('dirty: '+str(temp2.dirty))
                 if temp2.pos in visited:
                     if visited[temp2.pos]==temp2.cost:
                         continue
+
                 queue.insert(temp2)
+
+                del temp2
+        del temp
+
 
 dirty1 = ['b', 'i', 'o']
 start1 = 'g'
