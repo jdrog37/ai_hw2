@@ -29,16 +29,18 @@ class Node:
         self.__path = path
         self.pos = start
         self.dirty = dirty
+        self.numdirty = len(dirty)
         # print('NODE PATH: '+str(self.path))
 
     def isclean(self):
-        if len(self.dirty)==0:
+        if self.numdirty==0:
             return True
         return False
     
     def suck(self):
         if self.pos in self.dirty:
             self.cost += .6
+            self.numdirty -= 1
             self.dirty.remove(self.pos)
         return self
 
@@ -111,8 +113,9 @@ def uct(dirty, start):
         path = temp.getPath()
         cost = temp.cost
 
-        print(str(path))
-        print('dirty: '+str(dirty))
+        # print(str(path))
+        # print('dirty: '+str(dirty))
+        temp.suck()
 
         if temp.isclean():
 
@@ -129,8 +132,6 @@ def uct(dirty, start):
             for i in graph[temp.pos]:
                 # print(str(i))
                 temp2 = createNode(temp.dirty, i, path, cost)
-                
-                temp2.suck()
 
                 # print('cost '+str(graph[temp.pos][i]))
                 # print('temp2 cost: '+str(temp2.cost))
