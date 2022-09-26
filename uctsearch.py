@@ -1,4 +1,11 @@
 
+import time
+
+global numexp
+global numgen
+numgen = 0
+numexp = 0
+
 graph = {
           'a': {'b': .9, 'f':  .7},
           'b': {'a':  1, 'c':  .9, 'g':  .7},
@@ -30,6 +37,8 @@ class Node:
         self.pos = start
         self.dirty = dirty
         self.numdirty = len(dirty)
+        global numgen
+        numgen += 1
         # print('NODE PATH: '+str(self.path))
 
     def isclean(self):
@@ -58,6 +67,8 @@ def createNode(dirty, start, path, cost):
     node = Node(dirty, start, path, cost)
     return node
 
+
+# Priority Queue code adapted from https://www.geeksforgeeks.org/priority-queue-in-python/
 
 class PriorityQueue(object):
     def __init__(self):
@@ -98,6 +109,7 @@ class PriorityQueue(object):
 
 def uct(dirty, start):
 
+    global numexp
     queue = PriorityQueue()
     node = createNode(dirty, start, [], 0)
     queue.insert(node)
@@ -117,11 +129,13 @@ def uct(dirty, start):
         # print('dirty: '+str(dirty))
         temp.suck()
 
+        numexp += 1
+
         if temp.isclean():
 
             print('success')
-            print(str(temp.getPath()))
-            print(str(temp.cost))
+            # print(str(temp.getPath()))
+            # print(str(temp.cost))
             return
 
         else:
@@ -154,5 +168,20 @@ start1 = 'g'
 dirty2 = ['b', 'f', 'i', 'm']
 start2 = 'l'
 
+
+
+time1 = time.time()
 uct(dirty1, start1)
+print('Numgen: '+str(numgen))
+print('Numexp: '+str(numexp))
+numgen = 0
+numexp = 0
+
+time2 = time.time()
 uct(dirty2, start2)
+time3 = time.time()
+
+print('Room 1 time: '+str(time2-time1))
+print('Room 2 time: '+str(time3-time2))
+print('Numgen: '+str(numgen))
+print('Numexp: '+str(numexp))
